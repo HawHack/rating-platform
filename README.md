@@ -1,7 +1,16 @@
-веб-платформа для учета активности участников молодежного парламента и кадрового резерва.
 
-## Возможности проекта
+---
 
+# Если нужен вариант именно для TXT
+
+Вот версия для `run_instructions.txt`:
+
+```text
+RATING PLATFORM
+
+Веб-платформа для учета активности участников молодежного парламента и кадрового резерва.
+
+ВОЗМОЖНОСТИ ПРОЕКТА
 - Регистрация и авторизация пользователей
 - Роли: участник, организатор, наблюдатель (кадровая служба)
 - Создание мероприятий организаторами
@@ -15,66 +24,64 @@
 - Страница кадрового инспектора с фильтрами
 - Отчет по кандидату
 - Простая QR-ready check-in логика
-- Django Admin для управления
+- Django Admin для управления данными
 
-Технологии
-
+ТЕХНОЛОГИИ
 - Python 3.11+
 - Django 6.0.3
 - SQLite
 - Bootstrap 5
 - Chart.js
 
- Установка и запуск
+УСТАНОВКА И ЗАПУСК
 
- 1. Клонировать репозиторий
-
-```bash
-git clone  https://github.com/HawHack/rating-platform.git
+1. Клонировать репозиторий
+git clone https://github.com/HawHack/rating-platform.git
 cd rating-platform
-```
-2. Создать виртуальное окружение
-Windows (PowerShell)
-PowerShell
 
+2. Создать виртуальное окружение
+
+Windows PowerShell:
 python -m venv venv
 .\venv\Scripts\Activate.ps1
-Если PowerShell блокирует активацию, выполни:
-PowerShell
+
+Если PowerShell блокирует активацию:
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-Windows (Command Prompt)
-cmd
+
+Windows Command Prompt:
 python -m venv venv
 venv\Scripts\activate.bat
 
 3. Установить зависимости
-Bash
 pip install -r requirements.txt
 
 4. Применить миграции
-Bash
 python manage.py makemigrations
 python manage.py migrate
-5. Создать суперпользователя (админ)
-Bash
+
+5. Создать суперпользователя
 python manage.py createsuperuser
+
 6. (Опционально) Загрузить тестовые данные
-Bash
 python manage.py seed_data
-7. Запустить сервер разработки
-Bash
+
+7. Запустить сервер
 python manage.py runserver
 
-Открой в браузере:
+ПОСЛЕ ЗАПУСКА
 
-Сайт: http://127.0.0.1:8000/
-Админка: http://127.0.0.1:8000/admin/
-Тестовые аккаунты (после команды seed_data)
-Роль	Логин	Пароль
-Организатор	organizer1	12345678Qq
-Участник	participant1	12345678Qq
-Наблюдатель	observer1	12345678Qq
-Основные страницы
+Сайт:
+http://127.0.0.1:8000/
+
+Админка:
+http://127.0.0.1:8000/admin/
+
+ТЕСТОВЫЕ АККАУНТЫ (после seed_data)
+Организатор: organizer1 / 12345678Qq
+Участник: participant1 / 12345678Qq
+Наблюдатель: observer1 / 12345678Qq
+
+ОСНОВНЫЕ СТРАНИЦЫ
 Главная: /
 Мероприятия: /events/
 Рейтинг: /ratings/
