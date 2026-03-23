@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="mb-4">Профиль пользователя</h2>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="profile-label">Логин</div>
+                        <div class="profile-value">{{ profile_user.username }}</div>
+
+                        <div class="profile-label">ФИО</div>
+                        <div class="profile-value">{{ profile_user.full_name|default:"Не указано" }}</div>
+
+                        <div class="profile-label">Email</div>
+                        <div class="profile-value">{{ profile_user.email }}</div>
+
+                        <div class="profile-label">Роль</div>
+                        <div class="profile-value">{{ profile_user.get_role_display }}</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="profile-label">Город</div>
+                        <div class="profile-value">{{ profile_user.city|default:"Не указано" }}</div>
+
+                        <div class="profile-label">Возраст</div>
+                        <div class="profile-value">{{ profile_user.age|default:"Не указано" }}</div>
+
+                        <div class="profile-label">Направление</div>
+                        <div class="profile-value">{{ profile_user.direction|default:"Не указано" }}</div>
+
+                        {% if profile_user.role == 'organizer' %}
+                            <div class="profile-label">Статус организатора</div>
+                            <div class="profile-value">
+                                {% if profile_user.is_approved_organizer %}
+                                    <span class="badge bg-success">Одобрен</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">На модерации</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary mt-2">Редактировать профиль</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="section-title">Портфолио достижений</h4>
+
+                {% if portfolio %}
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Мероприятие</th>
+                                    <th>Дата</th>
+                                    <th>Организатор</th>
+                                    <th>Баллы</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in portfolio %}
+                                    <tr>
+                                        <td>{{ item.event.title }}</td>
+                                        <td>{{ item.event.date|date:"d.m.Y H:i" }}</td>
+                                        <td>{{ item.event.organizer.full_name|default:item.event.organizer.username }}</td>
+                                        <td><span class="badge bg-primary">{{ item.earned_points }}</span></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        Пока нет подтвержденных мероприятий в портфолио.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm stat-card mb-3">
+            <div class="card-body">
+                <div class="muted-label">Текущий рейтинг</div>
+                <h2 class="text-primary">{{ rating }}</h2>
+                <div class="text-muted">Сумма подтвержденных баллов</div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm stat-card mb-3">
+            <div class="card-body">
+                <div class="muted-label">Место в зачете</div>
+                <h2 class="text-success">
+                    {% if rank %}
+                        #{{ rank }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </h2>
+                <div class="text-muted">Позиция среди участников</div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm stat-card mb-3">
+            <div class="card-body">
+                <div class="muted-label">Подтвержденные мероприятия</div>
+                <h2>{{ confirmed_events_count }}</h2>
+                <div class="text-muted">Количество подтвержденных участий</div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm stat-card mb-3">
+            <div class="card-body">
+                <div class="muted-label">Текущий уровень</div>
+                <h3 class="text-warning">{{ current_level }}</h3>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="muted-label mb-2">Прогноз по уровню</div>
+
+                {% if next_level %}
+                    <p class="mb-2"><strong>Следующий уровень:</strong> {{ next_level }}</p>
+                    <p class="mb-0 text-muted">
+                        Не хватает <strong>{{ points_to_next }}</strong> баллов
+                    </p>
+                {% else %}
+                    <p class="mb-0 text-success">
+                        Вы достигли максимального уровня.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

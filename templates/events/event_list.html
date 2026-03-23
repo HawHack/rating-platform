@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Мероприятия{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Мероприятия</h2>
+
+    {% if user.is_authenticated and user.role == 'organizer' %}
+        <a href="{% url 'event_create' %}" class="btn btn-primary">Создать мероприятие</a>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Направление</label>
+                <select name="direction" class="form-select">
+                    <option value="">Все</option>
+                    {% for value, label in direction_choices %}
+                        <option value="{{ value }}" {% if selected_direction == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Статус</label>
+                <select name="status" class="form-select">
+                    <option value="">Все</option>
+                    <option value="upcoming" {% if selected_status == 'upcoming' %}selected{% endif %}>Будущие</option>
+                    <option value="past" {% if selected_status == 'past' %}selected{% endif %}>Прошедшие</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">Фильтровать</button>
+                <a href="{% url 'event_list' %}" class="btn btn-outline-secondary">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for event in events %}
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title">{{ event.title }}</h4>
+                    <p class="text-muted mb-2">{{ event.date|date:"d.m.Y H:i" }}</p>
+                    <p><strong>Организатор:</strong> {{ event.organizer.full_name|default:event.organizer.username }}</p>
+                    <p><strong>Направление:</strong> {{ event.get_direction_display }}</p>
+                    <p><strong>Баллы:</strong> {{ event.base_points }}</p>
+                    <p><strong>Коэффициент:</strong> {{ event.difficulty_coef }}</p>
+                    <p><strong>Итоговые баллы:</strong> {{ event.calculated_points }}</p>
+
+                    {% if event.bonus_text %}
+                        <p><strong>Бонусы:</strong> {{ event.bonus_text }}</p>
+                    {% endif %}
+
+                    <a href="{% url 'event_detail' event.id %}" class="btn btn-outline-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">Мероприятия пока не добавлены.</div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

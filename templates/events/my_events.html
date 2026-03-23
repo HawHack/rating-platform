@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои мероприятия{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Мои мероприятия</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if participations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Мероприятие</th>
+                            <th>Дата</th>
+                            <th>Организатор</th>
+                            <th>Статус</th>
+                            <th>Баллы</th>
+                            <th>QR / Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in participations %}
+                            <tr>
+                                <td>{{ item.event.title }}</td>
+                                <td>{{ item.event.date|date:"d.m.Y H:i" }}</td>
+                                <td>{{ item.event.organizer.full_name|default:item.event.organizer.username }}</td>
+                                <td>{{ item.get_status_display }}</td>
+                                <td>{{ item.earned_points }}</td>
+                                <td>
+                                    <a href="{% url 'checkin_by_qr' item.qr_token %}" class="btn btn-sm btn-outline-success">
+                                        QR check-in
+                                    </a>
+                                    <a href="{% url 'event_detail' item.event.id %}" class="btn btn-sm btn-outline-primary">
+                                        Открыть
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                Вы еще не записывались на мероприятия.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Участники мероприятия{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Участники: {{ event.title }}</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if participations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Участник</th>
+                            <th>Город</th>
+                            <th>Направление</th>
+                            <th>Статус</th>
+                            <th>Баллы</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in participations %}
+                            <tr>
+                                <td>{{ item.participant.full_name|default:item.participant.username }}</td>
+                                <td>{{ item.participant.city|default:"—" }}</td>
+                                <td>{{ item.participant.direction|default:"—" }}</td>
+                                <td>{{ item.get_status_display }}</td>
+                                <td>{{ item.earned_points }}</td>
+                                <td>
+                                    {% if item.status != 'confirmed' %}
+                                        <a href="{% url 'confirm_participation' item.id %}" class="btn btn-sm btn-success">
+                                            Подтвердить
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-success">Подтверждено</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                Пока никто не записался на это мероприятие.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'event_detail' event.id %}" class="btn btn-secondary">Назад к мероприятию</a>
+</div>
+{% endblock %}

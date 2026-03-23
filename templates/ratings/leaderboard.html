@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Рейтинг{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Глобальная таблица лидеров</h2>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Направление</label>
+                <select name="direction" class="form-select">
+                    <option value="">Все</option>
+                    {% for value, label in direction_choices %}
+                        <option value="{{ value }}" {% if selected_direction == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Город</label>
+                <input type="text" name="city" class="form-control" value="{{ selected_city|default:'' }}" placeholder="Введите город">
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Применить</button>
+                <a href="{% url 'leaderboard' %}" class="btn btn-outline-secondary">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if leaderboard %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Место</th>
+                            <th>Имя</th>
+                            <th>Направление</th>
+                            <th>Город</th>
+                            <th>Баллы</th>
+                            <th>Мероприятий</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in leaderboard %}
+                            <tr>
+                                <td>
+                                    {% if forloop.counter == 1 %}
+                                        🥇 {{ forloop.counter }}
+                                    {% elif forloop.counter == 2 %}
+                                        🥈 {{ forloop.counter }}
+                                    {% elif forloop.counter == 3 %}
+                                        🥉 {{ forloop.counter }}
+                                    {% else %}
+                                        {{ forloop.counter }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.user.full_name|default:item.user.username }}</td>
+                                <td>{{ item.user.direction|default:"—" }}</td>
+                                <td>{{ item.user.city|default:"—" }}</td>
+                                <td><strong>{{ item.rating }}</strong></td>
+                                <td>{{ item.confirmed_events_count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                Пока нет данных для отображения рейтинга.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

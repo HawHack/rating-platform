@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль организатора{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="mb-3">
+                    {{ organizer.full_name|default:organizer.username }}
+                </h2>
+
+                <p><strong>Логин:</strong> {{ organizer.username }}</p>
+                <p><strong>Email:</strong> {{ organizer.email }}</p>
+                <p><strong>Город:</strong> {{ organizer.city|default:"Не указано" }}</p>
+                <p><strong>Направление:</strong> {{ organizer.direction|default:"Не указано" }}</p>
+
+                <p>
+                    <strong>Статус:</strong>
+                    {% if organizer.is_approved_organizer %}
+                        <span class="badge bg-success">Одобрен</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">На модерации</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4 class="mb-3">Проведённые мероприятия</h4>
+
+                {% if events %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Дата</th>
+                                    <th>Направление</th>
+                                    <th>Баллы</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'event_detail' event.id %}">
+                                                {{ event.title }}
+                                            </a>
+                                        </td>
+                                        <td>{{ event.date|date:"d.m.Y H:i" }}</td>
+                                        <td>{{ event.get_direction_display }}</td>
+                                        <td>{{ event.calculated_points }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        У организатора пока нет мероприятий.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="mb-3">Отзывы участников</h4>
+
+                {% if can_leave_review and not show_review_form %}
+                    <a href="{% url 'add_organizer_review' organizer.id %}" class="btn btn-primary mb-3">
+                        Оставить отзыв
+                    </a>
+                {% endif %}
+
+                {% if show_review_form %}
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        {{ review_form.as_p }}
+                        <button type="submit" class="btn btn-success">Сохранить отзыв</button>
+                        <a href="{% url 'organizer_detail' organizer.id %}" class="btn btn-secondary">Отмена</a>
+                    </form>
+                {% endif %}
+
+                {% if reviews %}
+                    {% for review in reviews %}
+                        <div class="border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ review.participant.full_name|default:review.participant.username }}</strong>
+                                <span class="badge bg-warning text-dark">★ {{ review.rating }}/5</span>
+                            </div>
+                            <small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                            {% if review.comment %}
+                                <p class="mt-2 mb-0">{{ review.comment }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        Пока нет отзывов.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5>Количество мероприятий</h5>
+                <h2 class="text-primary">{{ events_count }}</h2>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5>Рейтинг доверия</h5>
+                <h2 class="text-success">
+                    {% if trust_rating %}
+                        {{ trust_rating|floatformat:1 }}/5
+                    {% else %}
+                        —
+                    {% endif %}
+                </h2>
+                <p class="mb-0 text-muted">На основе отзывов участников</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5>Количество отзывов</h5>
+                <h2 class="text-dark">{{ reviews_count }}</h2>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5>Обычно выдаёт бонусы</h5>
+
+                {% if bonus_list %}
+                    <ul class="mb-0">
+                        {% for bonus in bonus_list %}
+                            <li>{{ bonus }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">Бонусы пока не указаны.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

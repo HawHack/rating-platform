@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="mb-3">{{ event.title }}</h2>
+
+        <p class="text-muted">{{ event.date|date:"d.m.Y H:i" }}</p>
+
+        <p>
+            <strong>Организатор:</strong>
+            <a href="{% url 'organizer_detail' event.organizer.id %}">
+                {{ event.organizer.full_name|default:event.organizer.username }}
+            </a>
+        </p>
+        <p><strong>Направление:</strong> {{ event.get_direction_display }}</p>
+        <p><strong>Базовые баллы:</strong> {{ event.base_points }}</p>
+        <p><strong>Коэффициент сложности:</strong> {{ event.difficulty_coef }}</p>
+        <p><strong>Итоговые баллы:</strong> {{ event.calculated_points }}</p>
+
+        {% if event.max_participants %}
+            <p><strong>Максимум участников:</strong> {{ event.max_participants }}</p>
+        {% endif %}
+
+        {% if event.bonus_text %}
+            <p><strong>Бонусы:</strong> {{ event.bonus_text }}</p>
+        {% endif %}
+
+        <hr>
+        <h5>Описание</h5>
+        <p>{{ event.description }}</p>
+
+        <div class="mt-4 d-flex gap-2 flex-wrap">
+            <a href="{% url 'event_list' %}" class="btn btn-secondary">Назад</a>
+
+            {% if user.is_authenticated and user.role == 'participant' %}
+                {% if participation %}
+                    <span class="btn btn-success disabled">
+                        Вы записаны ({{ participation.get_status_display }})
+                    </span>
+
+                    <a href="{% url 'checkin_by_qr' participation.qr_token %}" class="btn btn-outline-success">
+                        QR check-in
+                    </a>
+                {% else %}
+                    <a href="{% url 'register_for_event' event.id %}" class="btn btn-primary">
+                        Участвовать
+                    </a>
+                {% endif %}
+            {% endif %}
+
+            {% if user.is_authenticated and user == event.organizer %}
+                <a href="{% url 'event_update' event.id %}" class="btn btn-outline-primary">
+                    Редактировать
+                </a>
+                <a href="{% url 'organizer_event_participants' event.id %}" class="btn btn-outline-dark">
+                    Участники
+                </a>
+            {% endif %}
+        </div>
+
+        {% if user.is_authenticated and user.role == 'participant' and checkin_url %}
+            <div class="alert alert-light border mt-4 mb-0">
+                <strong>Ссылка для QR check-in:</strong><br>
+                <small>{{ checkin_url }}</small>
+                <div class="text-muted mt-2">
+                    Для MVP можно открыть эту ссылку вручную или использовать как основу для QR-кода.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Дашборд{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2>Дашборд активности</h2>
+    <p class="text-muted mb-0">
+        Последние мероприятия, динамика рейтинга и популярные направления.
+    </p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h4 class="mb-3">Последние мероприятия</h4>
+
+                {% if latest_events %}
+                    <div class="row g-3">
+                        {% for event in latest_events %}
+                            <div class="col-md-6">
+                                <div class="border rounded p-3 h-100">
+                                    <h5 class="mb-2">{{ event.title }}</h5>
+                                    <p class="text-muted mb-2">{{ event.date|date:"d.m.Y H:i" }}</p>
+                                    <p class="mb-1">
+                                        <strong>Организатор:</strong>
+                                        <a href="{% url 'organizer_detail' event.organizer.id %}">
+                                            {{ event.organizer.full_name|default:event.organizer.username }}
+                                        </a>
+                                    </p>
+                                    <p class="mb-1"><strong>Направление:</strong> {{ event.get_direction_display }}</p>
+                                    <p class="mb-2"><strong>Баллы:</strong> {{ event.calculated_points }}</p>
+                                    <a href="{% url 'event_detail' event.id %}" class="btn btn-sm btn-outline-primary">
+                                        Открыть
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        Пока нет мероприятий.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="mb-3">Рост рейтинга</h4>
+
+                {% if user.is_authenticated %}
+                    {% if chart_data_json != "[]" %}
+                        <canvas id="ratingChart" height="100"></canvas>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            У вас пока нет подтвержденных участий для построения графика.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-secondary mb-0">
+                        Войдите в систему, чтобы увидеть график своей активности.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="mb-3">Популярные направления</h4>
+
+                {% if popular_directions %}
+                    {% for item in popular_directions %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ item.direction }}</span>
+                                <strong>{{ item.total }}</strong>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar" role="progressbar" style="width: {% widthratio item.total 10 100 %}%;">
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        Нет данных по направлениям.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% if user.is_authenticated and chart_data_json != "[]" %}
+<script>
+    const labels = JSON.parse('{{ chart_labels_json|escapejs }}');
+    const data = JSON.parse('{{ chart_data_json|escapejs }}');
+
+    const ctx = document.getElementById('ratingChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Накопленные баллы',
+                data: data,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.15)',
+                fill: true,
+                tension: 0.25
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
